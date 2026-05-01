@@ -71,7 +71,7 @@ Preferred:
 ```bash
 p3 task create \
   --project-id <projectId> \
-  --assigned-to-id @user \
+  --assignTo @user \
   --name "Task name" \
   --description "$(cat <<'EOF'
 ## Summary
@@ -101,7 +101,7 @@ EOF
 Batch when helpful:
 
 ```bash
-p3 task create-many --apply "--project-id <projectId> --assigned-to-id @user"
+p3 task create-many --apply "--project-id <projectId> --assignTo @user"
 ```
 
 Prefer batching when:
@@ -178,6 +178,7 @@ Preferred edit:
 p3 task update <task-id> \
   --name "Updated task name" \
   --status "Working on it" \
+  --assignTo @user \
   --description "$(cat <<'EOF'
 ## Summary
 Updated high-level summary.
@@ -188,6 +189,10 @@ Updated high-level summary.
 EOF
 )"
 ```
+
+Assignment note:
+- Use `--assignTo @username` or `--assignTo <userId>` for create/update.
+- `--assigned-to-id` and `--assignedTo` are legacy aliases and should only be used for older installed CLI versions.
 
 ## Status Conventions
 
