@@ -1,6 +1,6 @@
 ---
 name: p3-task-tracking
-description: Create, update, view, and set TaskP3 tasks with the p3 CLI. Use when the user mentions p3, TaskP3, task URLs, task IDs, linked tasks, current task tracking, or wants progress recorded while work is ongoing.
+description: Create, update, view, and set TaskP3 tasks with the p3 CLI; respond to and close triage submissions. Use when the user mentions p3, TaskP3, task URLs, task IDs, triage, Triage Submission, linked tasks, current task tracking, or wants progress recorded while work is ongoing.
 ---
 # P3 Task Tracking
 
@@ -10,10 +10,18 @@ Make TaskP3 work fast and low-friction.
 
 Optimize for:
 - fast task creation
+- fast, accurate triage replies
 - minimal back-and-forth
 - clean descriptions
 - correct project selection
 - lightweight linking between related tasks
+
+## CLI / auth
+
+- Run `p3` with access to local auth state (cookies/keychain). Restricted sandboxes often return `403` / `Not authenticated` — retry outside the sandbox when that happens.
+- On auth failure: tell the user to run `p3 login`, then retry. Do not print `p3 config:view` (contains tokens).
+- Prefer `--json` when parsing results.
+- Prefer `--response "$(cat <<'EOF' ... EOF)"` (or `--response-file`) for multi-line triage replies.
 
 ## Defaults
 
@@ -127,6 +135,69 @@ Only run after confirmation:
 p3 current set <task-id>
 ```
 
+## Triage Submissions
+
+Trigger phrases: "respond to this triage", Triage Submission tab URL, bot/firm question tickets.
+
+### Load
+
+```bash
+p3 task get <task-id> --json
+p3 task response list <task-id> --json
+```
+
+Read from JSON:
+- `triageSubmission.submission` — customer message (Slate JSON; extract plain text)
+- `triageSubmission.type` — e.g. `Question`, bug, etc.
+- `triageSubmission.metaData` / `externalCreatedByName`, firm/org tags, `url` (product deep link)
+- Existing responses before posting another
+
+### Answer quality
+
+1. Verify in product/code before stating how something works (do not guess from the ticket alone).
+2. Keep customer replies short, named when possible (`Hi Anne —`), step-by-step, no internal jargon or file paths.
+3. For how-to Questions: explain the supported path; note product nuances only if relevant.
+4. If it is a real bug/feature gap: say so briefly, avoid over-promising, and create/link an eng task when the user wants follow-up work.
+
+### Draft then send
+
+- If the user said "respond" / "reply": draft briefly in chat only when the answer is ambiguous or high-risk; otherwise post directly once verified.
+- If unsure of the product answer: investigate first, then post.
+
+```bash
+p3 task response create <task-id> --response "$(cat <<'EOF'
+Hi <Name> — <short answer>.
+
+<numbered steps if needed>
+
+<one clarifying nuance if needed>
+EOF
+)"
+```
+
+### Close out answered Questions
+
+After a complete how-to / clarification reply (not waiting on eng work):
+
+```bash
+# CLI quirk: close requires taskId twice
+p3 task submission close <task-id> <task-id>
+p3 done <task-id>
+```
+
+Do **not** mark Done if the triage needs eng follow-up still open on this same task. Prefer: reply → leave submission open or note next step → spawn/link eng task → keep triage status honest.
+
+### Useful commands
+
+```bash
+p3 task response create <task-id> --response "..."
+p3 task response list <task-id> --json
+p3 task response update <responseId> <task-id> --response "..."
+p3 task submission get <task-id> --json
+p3 task submission close <task-id> <task-id>
+p3 task submission open <task-id>   # check --help; may share close's arg quirk
+```
+
 ## Linking Tasks
 
 If tasks should reference each other, put TaskP3 URLs directly in descriptions where helpful.
@@ -233,11 +304,13 @@ Ask before:
 - setting current task
 - creating the task draft into a real task
 - choosing between multiple plausible projects
+- closing a triage that might still need eng work
 
 Do not ask for:
 - CLI default fields unless needed
 - extra ceremony around simple tasks
 - fields the user already gave
+- permission to reply when the user already said "respond to this triage" and the answer is verified
 
 ## Avoid
 
@@ -247,11 +320,15 @@ Do not ask for:
 - tiny one-off subtasks with no lasting value
 - replacing a good high-level description with raw execution notes
 - linking tasks everywhere when one or two URLs will do
+- guessing product behavior in triage replies without checking code/UI
+- dumping `p3 config:view` or tokens into chat
+- running `p3` in a restricted sandbox when auth fails (retry with full local auth access)
 
 ## End-of-Turn Habit
 
 Before ending a turn after meaningful P3 work:
 
-1. Make sure the task was created or updated as intended.
-2. Add relevant TaskP3 URLs if related tasks matter.
-3. Keep final task text concise and useful.
+1. Make sure the task was created, updated, or triage-replied as intended.
+2. For answered Question triages: response posted, submission closed, task Done (unless follow-up remains).
+3. Add relevant TaskP3 URLs if related tasks matter.
+4. Keep final task text concise and useful.
