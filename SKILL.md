@@ -1,6 +1,6 @@
 ---
 name: p3-task-tracking
-description: Create, update, view, and set TaskP3 tasks with the p3 CLI; respond to and close triage submissions. Use when the user mentions p3, TaskP3, task URLs, task IDs, triage, Triage Submission, linked tasks, current task tracking, or wants progress recorded while work is ongoing.
+description: Create, update, view, and set TaskP3 tasks via the TaskP3 MCP or p3 CLI; link PRs and branches; respond to and close triage submissions. Use when the user mentions p3, TaskP3, task URLs, task IDs, triage, Triage Submission, linked tasks, task PRs, task claims, current task tracking, or wants progress recorded while work is ongoing.
 ---
 # P3 Task Tracking
 
@@ -16,12 +16,20 @@ Optimize for:
 - correct project selection
 - lightweight linking between related tasks
 
+## MCP vs CLI
+
+- If a TaskP3 MCP server is connected and healthy, prefer its tools for reads/writes (same catalog as the CLI, no shell/auth friction).
+- If the MCP needs auth, authenticate once; if it errors, fall back to the `p3` CLI and mention that the MCP is down.
+- `p3 connections list` / `p3 connections revoke <id>` manage MCP clients connected to the account.
+
 ## CLI / auth
 
+- Requires CLI ≥ 0.3.1 (`brew upgrade p3` or `npm i -g @taskp3/cli`). Older versions lack `whoami`, `task pr`, `task branch`, `task claim`, and URL task refs.
 - Run `p3` with access to local auth state (cookies/keychain). Restricted sandboxes often return `403` / `Not authenticated` — retry outside the sandbox when that happens.
-- On auth failure: tell the user to run `p3 login`, then retry. Do not print `p3 config:view` (contains tokens).
+- Check auth with `p3 whoami --json`. On failure: tell the user to run `p3 login`, then retry. Do not print `p3 config:view` (contains tokens).
 - Prefer `--json` when parsing results.
 - Prefer `--response "$(cat <<'EOF' ... EOF)"` (or `--response-file`) for multi-line triage replies.
+- Task refs: `p3 select <url>`, `p3 task pr ... --task <id|url>`, and `p3 task branch --task <id|url>` accept a TaskP3 URL directly. `p3 task get`, `p3 current set`, and `p3 done` still need the UUID from `selectedTaskId=...`.
 
 ## Defaults
 
@@ -180,10 +188,11 @@ EOF
 After a complete how-to / clarification reply (not waiting on eng work):
 
 ```bash
-# CLI quirk: close requires taskId twice
-p3 task submission close <task-id> <task-id>
+p3 task submission close <task-id>
 p3 done <task-id>
 ```
+
+Legacy (CLI < 0.3.1): `close` required the task id twice — `p3 task submission close <task-id> <task-id>`.
 
 Do **not** mark Done if the triage needs eng follow-up still open on this same task. Prefer: reply → leave submission open or note next step → spawn/link eng task → keep triage status honest.
 
@@ -194,16 +203,16 @@ p3 task response create <task-id> --response "..."
 p3 task response list <task-id> --json
 p3 task response update <responseId> <task-id> --response "..."
 p3 task submission get <task-id> --json
-p3 task submission close <task-id> <task-id>
-p3 task submission open <task-id>   # check --help; may share close's arg quirk
+p3 task submission close <task-id>   # defaults to current task if omitted
+p3 task submission open <task-id>
 ```
 
 ## Linking Tasks
 
-If tasks should reference each other, put TaskP3 URLs directly in descriptions where helpful.
+If tasks should reference each other, put TaskP3 URLs directly in descriptions where helpful. This is the default for task-to-task links — especially when a parent lists its subtasks.
 
 Use URLs for:
-- parent tasks pointing to major related tasks
+- parent tasks listing their subtasks / major related tasks
 - sibling tasks that depend on each other
 - follow-up tasks created from a parent
 
@@ -223,6 +232,32 @@ Parent task format:
 - https://www.taskp3.com/p/...selectedTaskId=<id>
 - https://www.taskp3.com/p/...selectedTaskId=<id>
 ```
+
+## Linking Pull Requests
+
+Do not paste PR URLs into descriptions. Use GitHub tracking so PR state stays live on the task:
+
+```bash
+p3 task branch --task <id|url>            # suggested branch name; PRs from it auto-link (does not create the branch)
+p3 task pr list --task <id|url> --json    # attached PR snapshots
+p3 task pr refresh --task <id|url>        # re-poll GitHub now
+p3 task pr history --task <id|url> --link-id <id>
+```
+
+- When starting work on a task, use the `p3 task branch` name if the project has PR tracking enabled (`p3 project pr-tracking get --project-id <id>`).
+- Before marking Done, `p3 task pr list` should show the PR merged.
+
+## Exclusive Execution (agents)
+
+When an agent is picking up a task others might also grab:
+
+```bash
+p3 task claim get --task <id> --json
+p3 task claim acquire --task <id> --name <executor> [--mode worker|human]
+p3 task claim run --task <id> --name <executor> -- <command...>   # holds a 60s lease while the command runs
+```
+
+Do not `--takeover` without the user's say-so. Skip claims entirely for one-off human tasks.
 
 ## Update Workflow
 
@@ -320,6 +355,7 @@ Do not ask for:
 - tiny one-off subtasks with no lasting value
 - replacing a good high-level description with raw execution notes
 - linking tasks everywhere when one or two URLs will do
+- pasting PR URLs into descriptions instead of using `p3 task pr` / branch tracking
 - guessing product behavior in triage replies without checking code/UI
 - dumping `p3 config:view` or tokens into chat
 - running `p3` in a restricted sandbox when auth fails (retry with full local auth access)

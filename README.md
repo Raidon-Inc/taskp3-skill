@@ -1,6 +1,6 @@
 # TaskP3 Skill
 
-Agent skill for managing TaskP3 tasks through the public `p3` CLI.
+Agent skill for managing TaskP3 tasks through the TaskP3 MCP server or the public `p3` CLI.
 
 ## Install
 
@@ -19,7 +19,7 @@ npx skills add Raidon-Inc/taskp3-skill
 
 ## Requirements
 
-- `p3` CLI installed and authenticated
+- `p3` CLI ≥ 0.3.1 installed and authenticated (`npm i -g @taskp3/cli`), or a connected TaskP3 MCP server
 - Access to the relevant TaskP3 organization/project
 
 ## Safety
