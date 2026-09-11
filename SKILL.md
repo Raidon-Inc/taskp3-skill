@@ -244,8 +244,14 @@ p3 task pr refresh --task <id|url>        # re-poll GitHub now
 p3 task pr history --task <id|url> --link-id <id>
 ```
 
-- When starting work on a task, use the `p3 task branch` name if the project has PR tracking enabled (`p3 project pr-tracking get --project-id <id>`).
+- **Always start work on a task from the `p3 task branch` name.** The task ID in the branch name is what auto-links the PR. Check once per project with `p3 project pr-tracking get --project-id <id>`; if off, enable it (`p3 project pr-tracking set --project-id <id> --enabled`) and run `p3 github webhook-sync --project-id <id>` when `p3 github status` shows `webhookSetup: setup_required`.
+- If a PR was opened from a branch without the task ID, attach it manually right away (MCP `attach_task_pull_requests` / `p3 task pr attach`) — do not wait to be asked.
+- **Attach to every task the PR resolves.** When a parent/umbrella task references child or triage tasks (`referencedTaskIds`), attach each PR to the parent *and* to the specific child it fixes. Fetch the children to match PR → task; never attach only to the parent.
+- When replying to a triage that a PR fixed, attach the PR to that triage task before closing the submission or marking Done.
 - Before marking Done, `p3 task pr list` should show the PR merged.
+
+Bad: parent task gets both PRs; the two triage children it references get nothing.
+Good: parent gets both PRs; triage A gets PR #3191, triage B gets PR #3190.
 
 ## Exclusive Execution (agents)
 
@@ -356,6 +362,8 @@ Do not ask for:
 - replacing a good high-level description with raw execution notes
 - linking tasks everywhere when one or two URLs will do
 - pasting PR URLs into descriptions instead of using `p3 task pr` / branch tracking
+- branching without the `p3 task branch` name when a task exists for the work
+- attaching PRs only to a parent task and skipping the child/triage tasks they fix
 - guessing product behavior in triage replies without checking code/UI
 - dumping `p3 config:view` or tokens into chat
 - running `p3` in a restricted sandbox when auth fails (retry with full local auth access)
@@ -367,4 +375,5 @@ Before ending a turn after meaningful P3 work:
 1. Make sure the task was created, updated, or triage-replied as intended.
 2. For answered Question triages: response posted, submission closed, task Done (unless follow-up remains).
 3. Add relevant TaskP3 URLs if related tasks matter.
-4. Keep final task text concise and useful.
+4. Every PR for the work is attached to the task *and* to any child/triage tasks it resolves.
+5. Keep final task text concise and useful.
