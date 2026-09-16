@@ -73,3 +73,23 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
   Read [GitHub synchronization](references/github-sync.md).
 - For contested agent work use `task claim acquire/run`; never force takeover without
   authorization. Claims are unnecessary for a simple audit.
+
+## Groups
+
+A group is a task whose description is a list of child task links; the app's bulk
+Group action creates one and auto-generates its name from the children, so the name
+may describe only one child. `referencedTaskIds` is the child list.
+
+- Read every child before acting on a group. The group name is not the scope; the
+  children are. Report per child, and attach PRs to the child they resolve, not the group.
+- A group must share one outcome: one feature, one fix, or one release batch. Before
+  acting on a group, or when asked whether it is accurate, check that every child fits
+  the name. If not, say so and propose a regroup before doing member-level work.
+- Regroup by editing the group description (children are derived from its links):
+  rename the group to what the children actually share (for example a merge batch with
+  its date and target branch), or remove strays and create a separate group per theme.
+  Do not cancel or archive a stray child; only remove its link.
+- When creating a group, name it after the shared outcome, put one sentence of purpose
+  above the links, and never let a child's title become the group title.
+- A group is Done only when every child is Done. Do not mark children Done through
+  the group, and do not mark the group Done as a proxy for a child.
