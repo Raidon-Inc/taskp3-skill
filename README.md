@@ -26,7 +26,9 @@ npx skills add Raidon-Inc/taskp3-skill
 
 Tasks belong directly to projects. Feature trees are retired; use project-wide task listing and search.
 
-The skill and its `references/` match the CLI-bundled `p3-task-tracking` skill.
+`SKILL.md` and `references/` are a mirror of the CLI-bundled skill at
+`packages/p3-cli/skills/p3-task-tracking` in `Raidon-Inc/p3`. Propose changes there;
+CI pushes them here when they reach `main`. Direct edits are overwritten on the next sync.
 
 ## Safety
 
