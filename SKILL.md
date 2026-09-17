@@ -9,6 +9,8 @@ For the commands below, use CLI 1.0.0+ and its matching API deployment.
 Use `p3 skill print` for this version's core, or `--reference mcp-shapes` for a reference.
 For picking, starting, verifying, opening PRs and finishing, read [the agent loop](references/agent-loop.md).
 
+For checkpointing, handing off, or resuming work, read `p3 skill print --name p3-handoff`.
+
 ## Authentication
 
 - Check `p3 whoami --json`. Never print `p3 config:view` or credential values.
