@@ -63,6 +63,8 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
 ## Status and linking
 
 - `task statuses` discovers statuses, actions, and completion side effects.
+- Cancelling: pass `canceledReason` with `status:"Cancelled"` (CLI `--canceled-reason`).
+  It is stored on the task and in history, and cleared if the task leaves Cancelled.
 - Keep code work In Review through promotion until `main` and production are verified.
 - `delivery.branches` and `delivery.environments` record branch containment and first deployment.
   `task delivery sync` or opt-in automation refreshes this evidence without changing status.
