@@ -39,9 +39,9 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
 | Delivery | `task_delivery_get {taskId}` |
 
 - Prefer `fields:"id,name,status"`; request `descriptionText` or `descriptionMarkdown`
-  when descriptions matter. Raw `description` retains the Slate storage representation.
-- Follow `hasNextPage`/`nextPage` for lists. Search returns an array: increment `page`
-  until fewer than `limit` rows return. Filters apply before pagination; max limit 200.
+  when descriptions matter. List field `description` retains Slate; agent task get defaults to Markdown.
+- Follow `hasNextPage`/`nextPage` for lists and agent search. Legacy search arrays
+  require incrementing `page` until fewer than `limit` rows return. Filters apply before pagination; max limit 200.
 - `p3 task list --project-id ID` includes every assignee. `task list-user --user-id ID`
   preserves the detailed assigned-user view. Features are retired; do not walk a tree.
 
@@ -115,3 +115,19 @@ may describe only one child. `referencedTaskIds` is the child list.
   above the links, and never let a child's title become the group title.
 - A group is Done only when every child is Done. Do not mark children Done through
   the group, and do not mark the group Done as a proxy for a child.
+
+
+## Agent interface additions
+
+- Discover recipes, scopes and side effects with `p3 task capabilities` / `task_capabilities`.
+- Agent search defaults to the list pagination envelope; follow `nextPage` while
+  `hasNextPage` is true. Legacy REST arrays remain available.
+- Task get defaults to Markdown for agents; use `descriptionFormat: "slate"` or
+  `p3 task get --raw-description` for storage format.
+- Use `task_group_get` with `includeChildren: true` for revision and child summaries.
+  `task_group_add/remove` accept `taskId`, `memberId`, `expectedRevision`, `requestKey`.
+  Links remain authoritative; removal preserves visible text and never deletes children.
+- `task_start_next {projectId,executorName,requestKey}` atomically picks and claims ready
+  work. CLI: `p3 task start-next --project-id ID --name NAME`; keep its claim alive.
+- Brief comments/files are bounded; inspect completeness flags and fetch omitted context.
+- Save durable context and use `task wait` for an atomic checkpoint/watch/claim release.
