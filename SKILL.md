@@ -71,12 +71,30 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
 - Done means the task's acceptance criteria are met. Done also closes an open triage.
   A pure how-to Question can be Done after an authorized answer; code-related triage
   stays open until the fix reaches `main` and production, and validation is complete.
-- Use `p3 task branch --task ID` for a task-bearing branch name. Attach PRs to the parent
-  and every child/triage they resolve. Prefer structured PR links over description URLs.
+- Use `p3 task branch --task ID` for a task-bearing branch name.
+- Attach each new or existing PR as a structured link to every task/triage it actually
+  resolves, regardless of how the PR was opened. Verify the stored links
+  before handoff; a PR-body URL or auto-linking assumption is insufficient. Link a
+  parent only when the PR resolves its own scope; do not attach to a group container.
 - Before claiming shipped work, inspect PR and deployment evidence, including freshness.
   Read [GitHub synchronization](references/github-sync.md).
-- For contested agent work use `task claim acquire/run`; never force takeover without
-  authorization. Claims are unnecessary for a simple audit.
+
+## Execution ownership
+
+- Claim the task before implementation or resuming implementation, even when no
+  competing agent is visible. Prefer `p3 task start ID --name agent-name`; renew the
+  lease while actively working. Read the agent loop for commands. Read-only audits
+  and simple task administration do not require a claim.
+- If acquisition fails or renewal is lost, stop implementation and inspect ownership.
+  Never force takeover or adopt legacy work without authorization. If claims are
+  unavailable, report the blocker rather than silently working unclaimed.
+- Before handing off, pausing, or stopping for a blocker or review, save an internal
+  note with progress, branch/PR links, verification, blockers, and the next action.
+  Stop local workers and lease renewal, then explicitly release your claim and verify
+  release. Do not rely on expiry or release another executor's claim.
+- Release means relinquishing execution, not completing or unassigning the task.
+  Keep its status truthful; code awaiting review/promotion stays In Review. Reacquire
+  before resuming. Use `task finish` only when completion requirements are met.
 
 ## Groups
 

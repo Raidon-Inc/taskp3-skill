@@ -4,8 +4,10 @@
    Structured links and indexed description URLs support reverse lookup. Unique
    `p3/XXXXXXXX/slug` branches resolve before a PR exists; full UUIDs handle collisions.
    Verified TaskP3 URLs in PR bodies also auto-link when branch tracking is enabled.
-2. Attach PRs to the parent and every child/triage task they resolve. Preserve the link
-   revision and request key on retry. `task pr open ID` creates/reuses and attaches a PR.
+2. Attach PRs as structured links to every task/triage they actually resolve, including
+   PRs opened through other tools. Link a parent only when its own scope is resolved;
+   do not attach to a group container. Verify stored links before handoff. Preserve the
+   link revision and request key on retry. `task pr open ID` creates/reuses and attaches a PR.
 3. `task pr refresh ID` queues reconciliation. `task pr wait ID --until merged --timeout 20m`
    waits with a fixed deadline. Required PRs determine readiness; otherwise all links count.
 4. `task delivery get --task ID` observes fresh branch/deployment evidence.
