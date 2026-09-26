@@ -81,17 +81,23 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
 
 ## Execution ownership
 
-- Claim the task before implementation or resuming implementation, even when no
-  competing agent is visible. Prefer `p3 task start ID --name agent-name`; renew the
-  lease while actively working. Read the agent loop for commands. Read-only audits
-  and simple task administration do not require a claim.
-- If acquisition fails or renewal is lost, stop implementation and inspect ownership.
-  Never force takeover or adopt legacy work without authorization. If claims are
-  unavailable, report the blocker rather than silently working unclaimed.
+- Claims are best-effort. Try `task_start` (CLI `p3 task start ID --name agent-name`)
+  before implementation. If claims are disabled or the call fails for any reason other
+  than another executor owning the task, set the task Working on it, assign yourself,
+  mention the claim error in a note, and keep working. If those writes are rejected
+  too, continue the code work and report the blocker at the end. Read-only audits and simple
+  task administration never need a claim.
+- Over MCP, the connection that took the claim holds it: task writes, notes, heartbeat
+  and release work without passing the execution token. Re-running `task_start` on
+  your own active claim returns it; use that to recover a lost token or claim ID.
+- Stop only when a different executor holds an active claim. Never force takeover or
+  adopt legacy work without authorization.
+- On long work, renew with `task_claim_heartbeat` when convenient. If renewal fails,
+  re-run `task_start`; if that fails too, continue unclaimed and note it.
 - Before handing off, pausing, or stopping for a blocker or review, save an internal
   note with progress, branch/PR links, verification, blockers, and the next action.
-  Stop local workers and lease renewal, then explicitly release your claim and verify
-  release. Do not rely on expiry or release another executor's claim.
+  Try to release your claim; if release fails, note it and move on. Never release
+  another executor's claim.
 - Release means relinquishing execution, not completing or unassigning the task.
   Keep its status truthful; code awaiting review/promotion stays In Review. Reacquire
   before resuming. Use `task finish` only when completion requirements are met.
