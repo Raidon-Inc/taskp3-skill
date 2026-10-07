@@ -19,7 +19,8 @@
 False means confirmed absent; null means unknown. Branch names come from project policy.
 `delivery.environments.<name>` is the first successful artifact inclusion across affected
 services, using the deployment source's actual environment name (for example qa).
-It records historical delivery; inspect deployment current/history for rollback or availability.
+It records historical delivery; inspect deployment current/history for rollback or availability
+(over MCP, `task_deployments_list` shows 3 recent deploys per service; `deploymentHistory: true` for all).
 
 Status remains Not Started, Stuck, Working on it, In Review, Done, or Cancelled.
 Delivery sync never changes status, closes triage, or sends messages.

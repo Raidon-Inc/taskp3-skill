@@ -24,7 +24,7 @@ If a server advertises the old nested schema, use its schema:
 | `task_update_many` | `{requestKey,body:{taskIds,status}}` |
 | `task_response_create` | `{requestKey,params:{taskId},body:{response}}` |
 | `task_submission_open/close` | `{requestKey,params:{taskId}}` |
-| `list_task_pull_requests` | `{taskId}` |
+| `list_task_pull_requests` | `{taskId,pullRequestDetails?}` |
 | `attach_task_pull_requests` | `{taskId,urls,expectedRevision,requestKey,classification?}` |
 
 New servers retain these wrappers for already-connected clients. Do not mix flat fields

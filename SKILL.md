@@ -24,8 +24,10 @@ For checkpointing, handing off, or resuming work, read `p3 skill print --name p3
 
 ## Arguments and reads
 
-MCP arguments are flat. Tool descriptions include examples. For precise shapes and
-older server compatibility, read [MCP shapes](references/mcp-shapes.md).
+MCP arguments are flat. For precise shapes and older server compatibility, read
+[MCP shapes](references/mcp-shapes.md). The server lists only core tools by default:
+find others with `tool_search`, read their inputs with `tool_schema`, and call them by
+name or through `tool_call`. Connect to `/mcp?tools=full` to list every tool.
 
 | Need | MCP arguments |
 |---|---|
@@ -40,6 +42,16 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
 
 - Prefer `fields:"id,name,status"`; request `descriptionText` or `descriptionMarkdown`
   when descriptions matter. List field `description` retains Slate; agent task get defaults to Markdown.
+- Over MCP, `task_list_project`, `task_list_user`, `task_next`, `search` tasks, `notification_list` and thread/reaction
+  results embed compact rows `{id,name,status,url,priority,projectId,assignedToId,updatedAt}`;
+  pass `fields` (as in `task_list`) for more. `task_get`/`task_brief` send the description once
+  (Markdown); brief PRs carry a one-line `summary` unless `pullRequestDetails: true`.
+- MCP evidence reads are summaries by default: `list_task_pull_requests` uses the brief PR shape
+  (`pullRequestDetails: true` for files/commits/check runs); `task_deployments_list` gives current,
+  latest success, inclusion and 3 recent deploys per service (`deploymentHistory: true` for all);
+  `task_history_list` hides `pullRequest.progress` (`pullRequestProgress: true` shows each as its
+  changed fields). Plan submit/review return a `{planId,version,revision}` receipt; read versions
+  with `task_plans_list`. Nested nulls and empty lists are omitted; a missing key means none.
 - Follow `hasNextPage`/`nextPage` for lists and agent search. Legacy search arrays
   require incrementing `page` until fewer than `limit` rows return. Filters apply before pagination; max limit 200.
 - `p3 task list --project-id ID` includes every assignee. `task list-user --user-id ID`

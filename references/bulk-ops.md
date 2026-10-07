@@ -35,5 +35,6 @@ retry the identical command with its original `--mutation-key` so its steps repl
 Inspect partial/unknown outcomes before changing a batch or starting a new key.
 
 Older API fallback: `task list-project PROJECT_ID` is paginated and already avoids tree
-traversal. Consult `--help` for that version. Slate text fallback for a stored description:
+traversal. Consult `--help` for that version. Under `P3_TOKEN` (MCP) its rows are compact
+(`id,name,status,url,priority,projectId,assignedToId,updatedAt`); use `task get` for a description. Slate text fallback for a stored description:
 `jq -r '.description | fromjson | [.. | objects | .text? // empty] | join(" ")'`.
