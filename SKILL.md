@@ -86,7 +86,10 @@ older server compatibility, read [MCP shapes](references/mcp-shapes.md).
   than another executor owning the task, set the task Working on it, assign yourself,
   mention the claim error in a note, and keep working. If those writes are rejected
   too, continue the code work and report the blocker at the end. Read-only audits and simple
-  task administration never need a claim.
+  task administration never need a claim: name, description, priority and tag edits and
+  status changes such as Done or In Review pass on unclaimed tasks. Only entering
+  Working on it needs a claim, and only `task_start` assigns the task to you;
+  `task_claim_acquire` keeps the current assignee unless `assign: true` is passed.
 - Over MCP, the connection that took the claim holds it: task writes, notes, heartbeat
   and release work without passing the execution token. Re-running `task_start` on
   your own active claim returns it; use that to recover a lost token or claim ID.
