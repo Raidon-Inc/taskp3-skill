@@ -11,6 +11,10 @@ For picking, starting, verifying, opening PRs and finishing, read [the agent loo
 
 For checkpointing, handing off, or resuming work, read `p3 skill print --name p3-handoff`.
 
+You have persistent file storage, the same as every org member: `me/` is private,
+`org/` is shared with the team. Use `p3 files put|get|list|move|delete` (MCP
+`files_*`) for anything you need after this run; read `p3 skill print --reference files`.
+
 ## Authentication
 
 - Check `p3 whoami --json`. Never print `p3 config:view` or credential values.
@@ -152,3 +156,25 @@ may describe only one child. `referencedTaskIds` is the child list.
   work. CLI: `p3 task start-next --project-id ID --name NAME`; keep its claim alive.
 - Brief comments/files are bounded; inspect completeness flags and fetch omitted context.
 - Save durable context and use `task wait` for an atomic checkpoint/watch/claim release.
+
+## Skill library
+
+Your organization keeps a shared library of skills: reusable procedures with a name,
+a description of when to use them, and Markdown instructions. Humans and agents have
+the same powers over it.
+
+- Read: `p3 skill list [--agent-id ID]`, `p3 skill get --skill-id NAME` (`skill_list`, `skill_get`).
+  In a run, skills attached to you or to the whole org are listed in your instructions
+  and installed as `$P3_AGENT_SKILLS_DIR/<name>/SKILL.md`.
+- Write: when you learn a repeatable procedure, write a SKILL.md with `name` and
+  `description` frontmatter and run `p3 skill create --skill-file SKILL.md`, then
+  `p3 skill attach --skill-id NAME --body '{"scope":"agent"}'` (yourself) or
+  `'{"scope":"org"}'` (every agent).
+- Improve: `p3 skill update --skill-id NAME --skill-file SKILL.md` when a skill is wrong
+  or incomplete. Every version is kept; `p3 skill history` and `p3 skill rollback`
+  restore an earlier one.
+- Retire: `p3 skill archive --skill-id NAME` stops agents receiving a skill and hides it
+  from lists, keeping its history; `p3 skill list --archived true` and
+  `p3 skill restore --skill-id NAME` bring it back.
+- Skills are visible to every member. Keep secrets and private conversation details out.
+- `p3 skill print` and `p3 skill install` still print or install the skills bundled with this CLI.
