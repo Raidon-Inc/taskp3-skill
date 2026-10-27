@@ -165,15 +165,16 @@ may describe only one child. `referencedTaskIds` is the child list.
 
 Your organization keeps a shared library of skills: reusable procedures with a name,
 a description of when to use them, and Markdown instructions. Humans and agents have
-the same powers over it.
+the same powers over it, except that only people share a skill with other agents or
+change or restore one that other agents receive.
 
 - Read: `p3 skill list [--agent-id ID]`, `p3 skill get --skill-id NAME` (`skill_list`, `skill_get`).
   In a run, skills attached to you or to the whole org are listed in your instructions
   and installed as `$P3_AGENT_SKILLS_DIR/<name>/SKILL.md`.
 - Write: when you learn a repeatable procedure, write a SKILL.md with `name` and
   `description` frontmatter and run `p3 skill create --skill-file SKILL.md`, then
-  `p3 skill attach --skill-id NAME --body '{"scope":"agent"}'` (yourself) or
-  `'{"scope":"org"}'` (every agent).
+  `p3 skill attach --skill-id NAME --body '{"scope":"agent"}'` (yourself). A person
+  can attach it to another agent or with `'{"scope":"org"}'` (every agent).
 - Improve: `p3 skill update --skill-id NAME --skill-file SKILL.md` when a skill is wrong
   or incomplete. Every version is kept; `p3 skill history` and `p3 skill rollback`
   restore an earlier one.
